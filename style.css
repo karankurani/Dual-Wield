@@ -1,0 +1,23 @@
+body{
+	background-color: black;
+	color: green;
+}
+a{
+    color: white;
+}
+#centralNode {
+    border: 1px solid white;
+    width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.sections {
+    border: 1px dashed green;
+    width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.sections h2{
+    color: orange;
+	font-size: 12pt;
+}

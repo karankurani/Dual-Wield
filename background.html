@@ -1,0 +1,19 @@
+<script>
+var visID = '';
+
+chrome.tabs.onUpdated.addListener(function(tabId, props, tab) {
+    if (tab.url.indexOf("node.html") != -1)
+    {
+        visID = tab.id;
+    }
+    
+    if (props.status == "complete" 
+        && tab.title.indexOf("Wikipedia") != -1
+        && visID != '')
+    {
+        chrome.tabs.update(visID, {
+            url: 'node.html'
+        });
+    }   
+});
+</script>

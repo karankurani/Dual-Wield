@@ -1,0 +1,14 @@
+{
+  "name": "Dual Wield",
+  "version": "0.5",
+  "description": "Wikipedia visualizer for dual display navigation and overview support.",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "popup": "popup.html"
+  },
+  "background_page": "background.html",
+  "permissions": [
+    "tabs",
+    "http://*/*"
+  ]
+}
