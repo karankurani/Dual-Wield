@@ -188,15 +188,6 @@ function reload() {
     });
 }
 
-function getLinks(p) {
-    var links = $('a', p);
-    var linkText = "";
-    $(links).each(function() {
-        linkText = linkText + '<a href=\'http://en.wikipedia.org' + $(this).attr('href') + '\'>' + $(this).text() + '<br />';
-    });
-    return linkText;
-}
-
 function cleanLinks(p){
 	var links = $('a', p);
 	var cleaned_links = [];
@@ -208,6 +199,7 @@ function cleanLinks(p){
 	});
 	return cleaned_links;
 }
+
 chrome.windows.getAll({
     "populate": true
 },
@@ -244,18 +236,13 @@ function findWikiTab(windows) {
                 
                 chrome.tabs.sendRequest(wikiTabID, {action: "getDOM"},function(response) {
                     var dom = document.implementation.createDocument('http://www.w3.org/1999/xhtml', 'html', null);
-                    var body = document.createElementNS('http://www.w3.org/1999/xhtml', 'body');
+                    var responseBody = document.createElementNS('http://www.w3.org/1999/xhtml', 'body');
 					var mainHeading;
-                    body.innerHTML = response.dom;
-                    dom.documentElement.appendChild(body);
-					$('body').append('<div id="centralNode"></div>');
+                    responseBody.innerHTML = response.dom;
                     //Attaching the main title.
-                    $('#firstHeading', body).each(function() {
+                    $('#firstHeading', responseBody).each(function() {
                         var p = $(this).next().contents('#jump-to-nav').nextUntil('h2');
-                        var linkText = getLinks(p);
-						$('#centralNode').append('<h1>' + $(this).text() + '</h1>'
-                        + linkText + '<br />');
-						mainHeading = $(this).text();
+                        mainHeading = $(this).text();
 						sys.addNode(mainHeading,{fixed:true,mass:5,nodeType:'mainHeading'});
 						var links = cleanLinks(p);
 						var count = 0;
@@ -269,15 +256,9 @@ function findWikiTab(windows) {
 						});
                     });
                     //Attaching each of the sections.
-                    $('h2 .mw-headline', body).each(function() {
+                    $('h2 .mw-headline', responseBody).each(function() {
                         var p = $(this).closest('h2').nextUntil('h2');
-                        linkText = getLinks(p);
-                        $('body').append('<div class=\'sections\' id=\'' + $(this).attr('id')
-						+ '\' > <h2 class=\'sectionHeading\'>' + $(this).text() + '</h2>'
-                        + linkText
-						+ '</div>');
-						subsectionHeading = $(this).text();
-                        
+                        subsectionHeading = $(this).text();                       
                         // Format the URL of the sub-headers
                         hashloc = wikiTabURL.indexOf('#');
                         newWikiTabURL = wikiTabURL;
@@ -285,12 +266,11 @@ function findWikiTab(windows) {
                         {
                             newWikiTabURL = wikiTabURL.substr(0,hashloc);
                         }
-                        
                         // Replace spaces with underscores for the IDs
-                        newID = $(this).text().replace(/ /g,"_");
-                        
+                        newID = $(this).text().replace(/ /g,"_");                     
 						sys.addNode(subsectionHeading,{mass:1,link:newWikiTabURL+"#"+newID,nodeType:'subSection'});
 						sys.addEdge(mainHeading,subsectionHeading);
+						
 						var links = cleanLinks(p);
 						var count = 0;
 						$(links).each(function() {
