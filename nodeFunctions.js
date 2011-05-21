@@ -208,13 +208,13 @@ var wikiTabID = 0;
 var wikiTabURL = '';
 var links;
 
+
 function findWikiTab(windows) {
-
-	//var sys = arbor.ParticleSystem({friction:.0001, stiffness:200, repulsion:80,gravity:true,fps:55,dt:0.02,precision:0.6})
+   	//var sys = arbor.ParticleSystem({friction:.0001, stiffness:200, repulsion:80,gravity:true,fps:55,dt:0.02,precision:0.6})
 	var sys = arbor.ParticleSystem(80, 200, 0.8) // create the system with sensible repulsion/stiffness/friction
-    //sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
-    sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
-
+	//sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
+	sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...				
+	
     var numWindows = windows.length;
 
     for (var i = 0; i < numWindows; i++) {
@@ -226,6 +226,7 @@ function findWikiTab(windows) {
             if (tab.title.indexOf("Wikipedia") != -1) {
                 wikiTabID = tab.id;
                 wikiTabURL = tab.url;
+
                 chrome.tabs.executeScript(wikiTabID, {
                     code: "chrome.extension.onRequest.addListener(function(request, sender, sendResponse) { if (request.action == 'getDOM') sendResponse({dom: document.body.innerHTML }); else sendResponse({});}); "
                 });
