@@ -2,7 +2,6 @@
 var visID = '';
 
 chrome.tabs.onUpdated.addListener(function(tabId, props, tab) {
-
     if (tab.url.indexOf("node.html") != -1)
     {
         visID = tab.id;

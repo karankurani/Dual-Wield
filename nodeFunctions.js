@@ -199,7 +199,6 @@ function cleanLinks(p){
 	});
 	return cleaned_links;
 }
-
 chrome.windows.getAll({
     "populate": true
 },
@@ -208,13 +207,13 @@ var wikiTabID = 0;
 var wikiTabURL = '';
 var links;
 
-
 function findWikiTab(windows) {
-   	//var sys = arbor.ParticleSystem({friction:.0001, stiffness:200, repulsion:80,gravity:true,fps:55,dt:0.02,precision:0.6})
+
+	//var sys = arbor.ParticleSystem({friction:.0001, stiffness:200, repulsion:80,gravity:true,fps:55,dt:0.02,precision:0.6})
 	var sys = arbor.ParticleSystem(80, 200, 0.8) // create the system with sensible repulsion/stiffness/friction
-	//sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
-	sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...				
-	
+    //sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
+    sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
+
     var numWindows = windows.length;
 
     for (var i = 0; i < numWindows; i++) {
@@ -226,7 +225,6 @@ function findWikiTab(windows) {
             if (tab.title.indexOf("Wikipedia") != -1) {
                 wikiTabID = tab.id;
                 wikiTabURL = tab.url;
-
                 chrome.tabs.executeScript(wikiTabID, {
                     code: "chrome.extension.onRequest.addListener(function(request, sender, sendResponse) { if (request.action == 'getDOM') sendResponse({dom: document.body.innerHTML }); else sendResponse({});}); "
                 });
@@ -237,13 +235,15 @@ function findWikiTab(windows) {
                 
                 chrome.tabs.sendRequest(wikiTabID, {action: "getDOM"},function(response) {
                     var dom = document.implementation.createDocument('http://www.w3.org/1999/xhtml', 'html', null);
-                    var responseBody = document.createElementNS('http://www.w3.org/1999/xhtml', 'body');
+                    var body = document.createElementNS('http://www.w3.org/1999/xhtml', 'body');
 					var mainHeading;
-                    responseBody.innerHTML = response.dom;
+                    body.innerHTML = response.dom;
+                    dom.documentElement.appendChild(body);
+					$('body').append('<div id="centralNode"></div>');
                     //Attaching the main title.
-                    $('#firstHeading', responseBody).each(function() {
+                    $('#firstHeading', body).each(function() {
                         var p = $(this).next().contents('#jump-to-nav').nextUntil('h2');
-                        mainHeading = $(this).text();
+						mainHeading = $(this).text();
 						sys.addNode(mainHeading,{fixed:true,mass:5,nodeType:'mainHeading'});
 						var links = cleanLinks(p);
 						var count = 0;
@@ -257,13 +257,10 @@ function findWikiTab(windows) {
 						});
                     });
                     //Attaching each of the sections.
-                    $('h2 .mw-headline', responseBody).each(function() {
+                    $('h2 .mw-headline', body).each(function() {
                         var p = $(this).closest('h2').nextUntil('h2');
-                        subsectionHeading = $(this).text();
-                        //Do not display external links and references
-                        if(subsectionHeading=="External links" || subsectionHeading=="References" ){
-                        	return true;
-                        }                 
+						subsectionHeading = $(this).text();
+                        
                         // Format the URL of the sub-headers
                         hashloc = wikiTabURL.indexOf('#');
                         newWikiTabURL = wikiTabURL;
@@ -271,11 +268,12 @@ function findWikiTab(windows) {
                         {
                             newWikiTabURL = wikiTabURL.substr(0,hashloc);
                         }
+                        
                         // Replace spaces with underscores for the IDs
-                        newID = $(this).text().replace(/ /g,"_");                     
+                        newID = $(this).text().replace(/ /g,"_");
+                        
 						sys.addNode(subsectionHeading,{mass:1,link:newWikiTabURL+"#"+newID,nodeType:'subSection'});
 						sys.addEdge(mainHeading,subsectionHeading);
-						
 						var links = cleanLinks(p);
 						var count = 0;
 						$(links).each(function() {
