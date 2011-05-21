@@ -260,7 +260,9 @@ function findWikiTab(windows) {
                     $('h2 .mw-headline', body).each(function() {
                         var p = $(this).closest('h2').nextUntil('h2');
 						subsectionHeading = $(this).text();
-                        
+                        if(subsectionHeading==="External links" || subsectionHeading==="References" || subsectionHeading==="Notes"){
+                        	return true;
+                        }
                         // Format the URL of the sub-headers
                         hashloc = wikiTabURL.indexOf('#');
                         newWikiTabURL = wikiTabURL;
